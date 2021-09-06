@@ -4,20 +4,24 @@ Hooks.once("dragRuler.ready", (SpeedProvider) => {
       return [
         {
           id: "standard",
-          default: 0x1a8789,
+          default: 0x4499f5,
           name: "lancer-speed-provider.standard",
         },
         {
           id: "boost",
-          default: 0xc2a13a,
+          default: 0xf5d472,
           name: "lancer-speed-provider.boost",
         },
         {
           id: "over-boost",
-          default: 0xbe642a,
+          default: 0xff4b01,
           name: "lancer-speed-provider.over-boost",
         },
       ];
+    }
+
+    get defaultUnreachableColor() {
+      return 0x000000;
     }
 
     /**
