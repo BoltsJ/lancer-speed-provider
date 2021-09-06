@@ -7,5 +7,5 @@ A [Drag Ruler](https://foundryvtt.com/packages/drag-ruler) speed provider for la
 Paste the following manifest url into the foundry module installer:
 
 ```
-manifest: https://github.com/BoltsJ/lancer-speed-provider/releases/latest/download/module.json
+https://github.com/BoltsJ/lancer-speed-provider/releases/latest/download/module.json
 ```
