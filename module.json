@@ -11,6 +11,6 @@
   "dependencies": [{ "name": "drag-ruler" }],
   "esmodules": ["./lancer-provider.js"],
   "url": "https://github.com/BoltsJ/lancer-speed-provider.git",
-  "manifest": "https://raw.githubusercontent.com/BoltsJ/lancer-speed-provider/default/module.json",
+  "manifest": "https://raw.githubusercontent.com/BoltsJ/lancer-speed-provider/main/module.json",
   "download": "https://github.com/BoltsJ/lancer-speed-provider/archive/default.zip"
 }
