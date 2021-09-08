@@ -10,6 +10,13 @@
   "system": ["lancer"],
   "dependencies": [{ "name": "drag-ruler" }],
   "esmodules": ["./lancer-provider.js"],
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json"
+    }
+  ],
   "url": "https://github.com/BoltsJ/lancer-speed-provider.git",
   "manifest": "https://raw.githubusercontent.com/BoltsJ/lancer-speed-provider/main/module.json",
   "download": "https://github.com/BoltsJ/lancer-speed-provider/archive/default.zip"

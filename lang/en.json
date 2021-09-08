@@ -1,0 +1,7 @@
+{
+  "lancer-speed-provider": {
+    "standard": "Move",
+    "boost": "Boost",
+    "over-boost": "Overcharge + Boost"
+  }
+}
