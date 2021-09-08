@@ -24,46 +24,80 @@ Hooks.once("dragRuler.ready", (SpeedProvider) => {
       return 0x000000;
     }
 
-    /**
-     * @param token {Token}
-     */
+    /** @param token {Token} The token to check movement */
     getRanges(token) {
-      // Cant move if stunned or immobilized
+      const terrain_ruler = !!game.modules.get("terrain-ruler")?.active;
       const actor = token.actor;
       const effects = getStatusIds(actor);
-      const stunned =
-        effects.filter(
-          (e) =>
-            e?.endsWith("stunned") ||
-            e?.endsWith("immobilized") ||
-            e?.endsWith("shutdown") ||
-            e?.endsWith("downandout")
-        ).length > 0;
-      if (stunned) return [{ range: 0, color: "standard" }];
-
-      // Can't boost if stunned
       /**@type{number}*/
-      const speed = actor.data.data.derived.speed;
-      const slowed = effects.filter((e) => e?.endsWith("slow")).length > 0;
+      let speed = actor.data.data.derived.speed;
+      const stunned =
+        effects.filter((e) => {
+          return (
+            e.endsWith("stunned") ||
+            e.endsWith("immobilized") ||
+            e.endsWith("shutdown") ||
+            e.endsWith("downandout")
+          );
+        }).length > 0;
+      // Cant move if stunned or immobilized
+      if (stunned) return [{ range: -1, color: "standard" }];
 
-      const ranges = [{ range: speed, color: "standard" }];
-      if (!slowed && !actor.is_pilot())
-        ranges.push({ range: speed * 2, color: "boost" });
-      if (!slowed && canOvercharge(actor))
-        ranges.push({ range: speed * 3, color: "over-boost" });
+      const prone = effects.filter((e) => e.endsWith("prone")).length > 0;
+      const startedProne = !!game.combat?.combatants
+        .find((c) => c.data.tokenId === token.id)
+        ?.getFlag("lancer-speed-provider", "turn-status")
+        ?.find((e) => e.endsWith("prone"));
+      const slowed =
+        prone || effects.filter((e) => e.endsWith("slow")).length > 0;
+      // Handle prone reduced move with terrain layer iff it is installed
+      if (!terrain_ruler && prone) speed = Math.floor(speed / 2);
+
+      let range = speed;
+      const ranges = [];
+      if (prone || !startedProne) {
+        ranges.push({ range, color: "standard" });
+        range += speed;
+      }
+      if (!slowed) {
+        ranges.push({ range, color: "boost" });
+        range += speed;
+      }
+      if (!slowed && canOvercharge(actor)) {
+        ranges.push({ range, color: "over-boost" });
+        range += speed;
+      }
 
       return ranges;
     }
 
     /**
      * TODO: Figure out what ignores difficult terrain
-    getCostForStep(token, area, options={}) {
-      return super.getCostForStep(token, area, options);
+     * Bulwark Mods (Mech system & npc feature)
+     * Kai Bioplating (Core bonus and npc feature)
+     * Weathering (Npc trait, wallflower, Swallowtail ranger variant)
+     */
+    getCostForStep(token, area, options = {}) {
+      const effects = getStatusIds(token.actor);
+      const prone = effects.filter((e) => e?.endsWith("prone")).length > 0;
+      return Math.max(
+        prone ? 2 : 1,
+        super.getCostForStep(token, area, options)
+      );
     }
-    */
   }
 
   dragRuler.registerModule("lancer-speed-provider", LancerSpeedProvider);
+});
+
+Hooks.on("updateCombat", (combat, change) => {
+  if (!("turn" in change) || !combat.current.tokenId) return;
+  const token = game.canvas.tokens.get(combat.current.tokenId);
+  if (!token?.isOwner) return;
+  combatant = combat.combatants.get(combat.current.combatantId);
+  if (!combatant?.isOwner) return;
+  const conditionIds = getStatusIds(token.actor);
+  combatant.setFlag("lancer-speed-provider", "turn-status", conditionIds);
 });
 
 /**
@@ -83,5 +117,7 @@ function canOvercharge(actor) {
  * @returns {Array<string>}
  */
 function getStatusIds(actor) {
-  return actor.effects.map((e) => e.getFlag("core", "statusId"));
+  return actor.effects
+    .map((e) => e.getFlag("core", "statusId"))
+    .filter((e) => !!e);
 }
