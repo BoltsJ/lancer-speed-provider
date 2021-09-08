@@ -35,23 +35,8 @@ jobs:
         allowUpdates: true # set this to false if you want to prevent updating existing releases
         name: ${{ github.event.release.name }}
         draft: false
-        prerelease: false
+        prerelease: true
         token: ${{ secrets.GITHUB_TOKEN }}
         artifacts: './module.json, ./module.zip'
         tag: ${{ github.event.release.tag_name }}
-        body: ${{ github.event.release.body }}
-
-    # Update the 'latest' release
-    - name: Create Release
-      id: create_latest_release
-      uses: ncipollo/release-action@v1
-      if: endsWith(github.ref, 'master')
-      with:
-        allowUpdates: true
-        name: Latest
-        draft: false
-        prerelease: true
-        token: ${{ secrets.GITHUB_TOKEN }}
-        artifacts: './module.json,./module.zip'
-        tag: latest
         body: ${{ github.event.release.body }}
