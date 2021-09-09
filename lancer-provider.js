@@ -82,7 +82,7 @@ Hooks.once("dragRuler.ready", (SpeedProvider) => {
       const prone = effects.filter((e) => e?.endsWith("prone")).length > 0;
       return Math.max(
         prone ? 2 : 1,
-        game.terrainRuler?.active
+        window.terrainRuler?.active
           ? super.getCostForStep(token, area, options)
           : 1
       );
