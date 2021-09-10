@@ -80,12 +80,9 @@ Hooks.once("dragRuler.ready", (SpeedProvider) => {
     getCostForStep(token, area, options = {}) {
       const effects = getStatusIds(token.actor);
       const prone = effects.filter((e) => e?.endsWith("prone")).length > 0;
-      return Math.max(
-        prone ? 2 : 1,
-        window.terrainRuler?.active
-          ? super.getCostForStep(token, area, options)
-          : 1
-      );
+      return window.terrainRuler?.active
+        ? Math.max(prone ? 2 : 1, super.getCostForStep(token, area, options))
+        : 1;
     }
   }
 
