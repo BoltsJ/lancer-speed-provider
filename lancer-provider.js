@@ -93,7 +93,7 @@ Hooks.on("updateCombat", (combat, change) => {
   if (!("turn" in change) || !combat.current.tokenId) return;
   const token = game.canvas.tokens.get(combat.current.tokenId);
   if (!token?.isOwner) return;
-  combatant = combat.combatants.get(combat.current.combatantId);
+  const combatant = combat.combatants.get(combat.current.combatantId);
   if (!combatant?.isOwner) return;
   const conditionIds = getStatusIds(token.actor);
   combatant.setFlag("lancer-speed-provider", "turn-status", conditionIds);
