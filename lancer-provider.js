@@ -76,7 +76,7 @@ Hooks.once("dragRuler.ready", (SpeedProvider) => {
         .find((c) => c.tokenId === token.id)
         ?.getFlag("lancer-speed-provider", "turn-status")
         ?.some((e) => e.endsWith("prone"));
-      const slowed = prone || effects.some((e) => e.endsWith("slowed"));
+      const slowed = prone || effects.some((e) => e.endsWith("slow"));
       // Handle prone reduced move with terrain layer iff it is installed
       if (!terrain_ruler && prone) speed = Math.floor(speed / 2);
 
