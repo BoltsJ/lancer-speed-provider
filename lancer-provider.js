@@ -1,3 +1,27 @@
+Hooks.once("enhancedTerrainLayer.ready", (RuleProvider) => {
+  class LancerRuleProvider extends RuleProvider {
+    /**
+     * TODO: Figure out what ignores difficult terrain
+     * Bulwark Mods (Mech system & npc feature)
+     * Kai Bioplating (Core bonus and npc feature)
+     * Weathering (Npc trait, wallflower, Swallowtail ranger variant)
+     */
+    calculateCombinedCost(terrain, options) {
+      const effects = getStatusIds(options.token.actor);
+      const prone = effects.some((e) => e.endsWith("prone"));
+      return Math.max(
+        super.calculateCombinedCost(terrain, options),
+        prone ? 2 : 1
+      );
+    }
+  }
+
+  enhancedTerrainLayer.registerModule(
+    "lancer-speed-provider",
+    LancerRuleProvider
+  );
+});
+
 Hooks.once("dragRuler.ready", (SpeedProvider) => {
   class LancerSpeedProvider extends SpeedProvider {
     get colors() {
@@ -30,7 +54,7 @@ Hooks.once("dragRuler.ready", (SpeedProvider) => {
       const actor = token.actor;
       const effects = getStatusIds(actor);
       /**@type{number}*/
-      let speed = actor.data.data.derived.speed;
+      let speed = actor.system.derived.speed;
       const stunned =
         effects.filter((e) => {
           return (
@@ -43,13 +67,13 @@ Hooks.once("dragRuler.ready", (SpeedProvider) => {
       // Cant move if stunned or immobilized
       if (stunned) return [{ range: -1, color: "standard" }];
 
-      const prone = effects.filter((e) => e.endsWith("prone")).length > 0;
-      const startedProne = !!game.combat?.combatants
-        .find((c) => c.data.tokenId === token.id)
+      const prone = effects.some((e) => e.endsWith("prone"));
+      /** @type {boolean} */
+      const startedProne = game.combat?.combatants
+        .find((c) => c.tokenId === token.id)
         ?.getFlag("lancer-speed-provider", "turn-status")
-        ?.find((e) => e.endsWith("prone"));
-      const slowed =
-        prone || effects.filter((e) => e.endsWith("slowed")).length > 0;
+        ?.some((e) => e.endsWith("prone"));
+      const slowed = prone || effects.some((e) => e.endsWith("slowed"));
       // Handle prone reduced move with terrain layer iff it is installed
       if (!terrain_ruler && prone) speed = Math.floor(speed / 2);
 
@@ -69,20 +93,6 @@ Hooks.once("dragRuler.ready", (SpeedProvider) => {
       }
 
       return ranges;
-    }
-
-    /**
-     * TODO: Figure out what ignores difficult terrain
-     * Bulwark Mods (Mech system & npc feature)
-     * Kai Bioplating (Core bonus and npc feature)
-     * Weathering (Npc trait, wallflower, Swallowtail ranger variant)
-     */
-    getCostForStep(token, area, options = {}) {
-      const effects = getStatusIds(token.actor);
-      const prone = effects.filter((e) => e?.endsWith("prone")).length > 0;
-      return window.terrainRuler?.active
-        ? Math.max(prone ? 2 : 1, super.getCostForStep(token, area, options))
-        : 1;
     }
   }
 
@@ -104,10 +114,9 @@ Hooks.on("updateCombat", (combat, change) => {
  */
 function canOvercharge(actor) {
   if (actor.is_npc()) {
-    const limitless = actor.itemTypes.npc_feature.find(
+    const limitless = actor.itemTypes.npc_feature.some(
       (i) => i.name === "LIMITLESS"
     );
-    return !!limitless;
   }
   return actor.is_mech();
 }
