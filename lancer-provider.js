@@ -7,7 +7,7 @@ Hooks.once("enhancedTerrainLayer.ready", (RuleProvider) => {
      * Weathering (Npc trait, wallflower, Swallowtail ranger variant)
      */
     calculateCombinedCost(terrain, options) {
-      const effects = getStatusIds(options.token.actor);
+      const effects = getStatusIds(options.token?.actor);
       const prone = effects.some((e) => e.endsWith("prone"));
       return Math.max(
         super.calculateCombinedCost(terrain, options),
@@ -114,9 +114,7 @@ Hooks.on("updateCombat", (combat, change) => {
  */
 function canOvercharge(actor) {
   if (actor.is_npc()) {
-    const limitless = actor.itemTypes.npc_feature.some(
-      (i) => i.name === "LIMITLESS"
-    );
+    return actor.itemTypes.npc_feature.some((i) => i.name === "LIMITLESS");
   }
   return actor.is_mech();
 }
@@ -125,7 +123,9 @@ function canOvercharge(actor) {
  * @returns {Array<string>}
  */
 function getStatusIds(actor) {
-  return actor.effects
-    .map((e) => e.getFlag("core", "statusId"))
-    .filter((e) => !!e);
+  return (
+    actor?.effects
+      .map((e) => e.getFlag("core", "statusId"))
+      .filter((e) => !!e) ?? []
+  );
 }
