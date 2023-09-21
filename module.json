@@ -1,32 +1,32 @@
 {
-  "name": "lancer-speed-provider",
+  "id": "lancer-speed-provider",
   "title": "Lancer Speed Provider",
   "description": "Provides Drag Ruler speed settings for Lancer",
   "authors": [{ "name": "Bolts" }],
   "type": "module",
   "version": "0.0a",
-  "minimumCoreVersion": "10",
   "compatibility": {
-    "minimum": 10,
-    "verified": "10.303",
-    "maximum": 10
+    "minimum": "11",
+    "verified": "11.308"
   },
   "relationships": {
     "systems": [
       {
         "id": "lancer",
-        "compatibility": { "minimum": "1.4.1", "verified": "1.6.1" }
+        "type": "system",
+        "compatibility": {
+          "minimum": "2.0.0",
+          "verified": "2.0.0-rc1"
+        }
       }
     ],
-    "requires": [{ "id": "drag-ruler" }],
-    "recommends": [
+    "requires": [
       {
-        "id": "terrain-ruler",
-        "reason": "Proper handling of prone condition as difficult terrain"
+        "id": "drag-ruler",
+        "type": "module"
       }
     ]
   },
-  "system": ["lancer"],
   "esmodules": ["./lancer-provider.js"],
   "languages": [
     {

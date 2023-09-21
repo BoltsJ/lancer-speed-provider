@@ -1,3 +1,4 @@
+// TODO: Remove when it's 100% that ETL is ded.
 Hooks.once("enhancedTerrainLayer.ready", (RuleProvider) => {
   class LancerRuleProvider extends RuleProvider {
     /**
@@ -7,7 +8,8 @@ Hooks.once("enhancedTerrainLayer.ready", (RuleProvider) => {
      * Weathering (Npc trait, wallflower, Swallowtail ranger variant)
      */
     calculateCombinedCost(terrain, options) {
-      const effects = getStatusIds(options.token?.actor);
+      /** @type {Set<string>} */
+      const effects = Array.from(options.token.actor.statuses);
       const prone = effects.some((e) => e.endsWith("prone"));
       return Math.max(
         super.calculateCombinedCost(terrain, options),
@@ -50,11 +52,12 @@ Hooks.once("dragRuler.ready", (SpeedProvider) => {
 
     /** @param token {Token} The token to check movement */
     getRanges(token) {
-      const terrain_ruler = !!game.modules.get("terrain-ruler")?.active;
+      // const terrain_ruler = !!game.modules.get("terrain-ruler")?.active;
+      const terrain_ruler = false; // It don't werk anymore. Will probably come back in v12
       const actor = token.actor;
-      const effects = getStatusIds(actor);
+      const effects = Array.from(actor.statuses);
       /**@type{number}*/
-      let speed = actor.system.derived.speed;
+      let speed = actor.system.speed;
       const stunned =
         effects.filter((e) => {
           return (
@@ -73,7 +76,7 @@ Hooks.once("dragRuler.ready", (SpeedProvider) => {
         .find((c) => c.tokenId === token.id)
         ?.getFlag("lancer-speed-provider", "turn-status")
         ?.some((e) => e.endsWith("prone"));
-      const slowed = prone || effects.some((e) => e.endsWith("slowed"));
+      const slowed = prone || effects.some((e) => e.endsWith("slow"));
       // Handle prone reduced move with terrain layer iff it is installed
       if (!terrain_ruler && prone) speed = Math.floor(speed / 2);
 
@@ -105,7 +108,7 @@ Hooks.on("updateCombat", (combat, change) => {
   if (!token?.isOwner) return;
   const combatant = combat.combatants.get(combat.current.combatantId);
   if (!combatant?.isOwner) return;
-  const conditionIds = getStatusIds(token.actor);
+  const conditionIds = Array.from(token.actor.statuses);
   combatant.setFlag("lancer-speed-provider", "turn-status", conditionIds);
 });
 
@@ -117,15 +120,4 @@ function canOvercharge(actor) {
     return actor.itemTypes.npc_feature.some((i) => i.name === "LIMITLESS");
   }
   return actor.is_mech();
-}
-
-/**
- * @returns {Array<string>}
- */
-function getStatusIds(actor) {
-  return (
-    actor?.effects
-      .map((e) => e.getFlag("core", "statusId"))
-      .filter((e) => !!e) ?? []
-  );
 }
