@@ -12,7 +12,12 @@
     "maximum": 10
   },
   "relationships": {
-    "systems": [{ "id": "lancer", "minimum": "1.4.1", "verified": "1.6.1" }],
+    "systems": [
+      {
+        "id": "lancer",
+        "compatibility": { "minimum": "1.4.1", "verified": "1.6.1" }
+      }
+    ],
     "requires": [{ "id": "drag-ruler" }],
     "recommends": [
       {
