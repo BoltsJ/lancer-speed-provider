@@ -57,7 +57,7 @@ Hooks.once("dragRuler.ready", (SpeedProvider) => {
       const actor = token.actor;
       const effects = Array.from(actor.statuses);
       /**@type{number}*/
-      let speed = actor.system.speed += enkidu_all_fours(actor);
+      let speed = actor.system.speed + enkidu_all_fours(actor);
       const stunned =
         effects.filter((e) => {
           return (
