@@ -13,7 +13,7 @@ Hooks.once("enhancedTerrainLayer.ready", (RuleProvider) => {
       const prone = effects.some((e) => e.endsWith("prone"));
       return Math.max(
         super.calculateCombinedCost(terrain, options),
-        prone ? 2 : 1
+        prone ? 2 : 1,
       );
     }
   }
@@ -57,7 +57,7 @@ Hooks.once("dragRuler.ready", (SpeedProvider) => {
       const actor = token.actor;
       const effects = Array.from(actor.statuses);
       /**@type{number}*/
-      let speed = actor.system.speed;
+      let speed = actor.system.speed += enkidu_all_fours(actor);
       const stunned =
         effects.filter((e) => {
           return (
@@ -120,4 +120,11 @@ function canOvercharge(actor) {
     return actor.itemTypes.npc_feature.some((i) => i.name === "LIMITLESS");
   }
   return actor.is_mech();
+}
+
+function enkidu_all_fours(actor) {
+  return actor.items.some((i) => i.system.lid === "mf_tokugawa_alt_enkidu") &&
+    Array.from(actor.statuses).some((e) => e.endsWith("dangerzone"))
+    ? 3
+    : 0;
 }
