@@ -1,29 +1,3 @@
-// TODO: Remove when it's 100% that ETL is ded.
-Hooks.once("enhancedTerrainLayer.ready", (RuleProvider) => {
-  class LancerRuleProvider extends RuleProvider {
-    /**
-     * TODO: Figure out what ignores difficult terrain
-     * Bulwark Mods (Mech system & npc feature)
-     * Kai Bioplating (Core bonus and npc feature)
-     * Weathering (Npc trait, wallflower, Swallowtail ranger variant)
-     */
-    calculateCombinedCost(terrain, options) {
-      /** @type {Set<string>} */
-      const effects = Array.from(options.token.actor.statuses);
-      const prone = effects.some((e) => e.endsWith("prone"));
-      return Math.max(
-        super.calculateCombinedCost(terrain, options),
-        prone ? 2 : 1,
-      );
-    }
-  }
-
-  enhancedTerrainLayer.registerModule(
-    "lancer-speed-provider",
-    LancerRuleProvider
-  );
-});
-
 Hooks.once("dragRuler.ready", (SpeedProvider) => {
   class LancerSpeedProvider extends SpeedProvider {
     get colors() {
@@ -52,8 +26,6 @@ Hooks.once("dragRuler.ready", (SpeedProvider) => {
 
     /** @param token {Token} The token to check movement */
     getRanges(token) {
-      // const terrain_ruler = !!game.modules.get("terrain-ruler")?.active;
-      const terrain_ruler = false; // It don't werk anymore. Will probably come back in v12
       const actor = token.actor;
       const effects = Array.from(actor.statuses);
       /**@type{number}*/
@@ -78,7 +50,7 @@ Hooks.once("dragRuler.ready", (SpeedProvider) => {
         ?.some((e) => e.endsWith("prone"));
       const slowed = prone || effects.some((e) => e.endsWith("slow"));
       // Handle prone reduced move with terrain layer iff it is installed
-      if (!terrain_ruler && prone) speed = Math.floor(speed / 2);
+      if (prone) speed = Math.floor(speed / 2);
 
       let range = speed;
       const ranges = [];
