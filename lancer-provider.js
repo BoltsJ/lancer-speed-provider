@@ -155,6 +155,22 @@ Hooks.once("init", () => {
   CONFIG.elevationruler.SPEED.maximumCategoryDistance = maximumCategoryDistance;
 });
 
+Hooks.once("lancer.registerFlows", (steps, flows) => {
+  steps.set("addCorePowerSE", async ({ actor }) => {
+    const ae = getDocumentClass("ActiveEffect");
+    await ae.create({
+      name: game.i18n.localize("lancer-speed-provider.statuses.core_power"),
+      statuses: ["core_power_active"],
+      icon: "systems/lancer/assets/icons/macro-icons/corebonus.svg",
+      "flags.lancer-speed-provider.status": true,
+    }, { parent: actor });
+    return true;
+  });
+  flows
+    .get("CoreActiveFlow")
+    ?.insertStepAfter("consumeCorePower", "addCorePowerSE");
+});
+
 Hooks.on("updateCombat", (combat, change) => {
   if (!("turn" in change) || !combat.current.tokenId) return;
   const token = game.canvas.tokens.get(combat.current.tokenId);
