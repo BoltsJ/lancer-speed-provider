@@ -1,6 +1,8 @@
-# Lancer Speed Provider
+# Lancer Ruler Integration
 
-A [Drag Ruler](https://foundryvtt.com/packages/drag-ruler) speed provider for lancer.  It features integration with conditions and actor types.
+Integration of LANCER's rules for [Drag Ruler](https://foundryvtt.com/packages/drag-ruler) or,
+experimentally, [Elevation Ruler](https://foundryvtt.com/packages/elevationruler). It features
+integration with conditions and actor types to ensure that the range increments shown are correct.
 
 ## Features
 
@@ -15,7 +17,7 @@ A [Drag Ruler](https://foundryvtt.com/packages/drag-ruler) speed provider for la
 
 ### Recommended
 
-Search for “Lancer Speed Provider” on the foundry module browser.
+Search for “Lancer Ruler Integration” or “Lancer Speed Provider” on the foundry module browser.
 
 ### Manual
 

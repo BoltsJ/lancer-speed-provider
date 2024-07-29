@@ -1,13 +1,13 @@
 {
   "id": "lancer-speed-provider",
-  "title": "Lancer Speed Provider",
+  "title": "Lancer Ruler Integration",
   "description": "Provides Drag Ruler speed settings for Lancer",
   "authors": [{ "name": "Bolts" }],
   "type": "module",
   "version": "0.0a",
   "compatibility": {
     "minimum": "11",
-    "verified": "11"
+    "verified": "12"
   },
   "relationships": {
     "systems": [
@@ -20,10 +20,11 @@
         }
       }
     ],
-    "requires": [
+    "recommends": [
       {
         "id": "drag-ruler",
-        "type": "module"
+        "type": "module",
+        "reason": "Either Drag Ruler or Elevation Ruler is required. Drag Ruler is recommended. They conflict, so only enable one"
       }
     ]
   },

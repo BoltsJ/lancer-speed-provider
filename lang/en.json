@@ -2,6 +2,11 @@
   "lancer-speed-provider": {
     "standard": "Move",
     "boost": "Boost",
-    "over-boost": "Overcharge + Boost"
+    "over-boost": "Overcharge + Boost",
+    "settings": {
+      "color-standard": { "label": "Standard Move Color" },
+      "color-boost": { "label": "Boost Color" },
+      "color-over-boost": { "label": "Overcharge+Boost Color" }
+    }
   }
 }
