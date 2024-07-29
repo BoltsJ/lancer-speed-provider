@@ -158,12 +158,15 @@ Hooks.once("init", () => {
 Hooks.once("lancer.registerFlows", (steps, flows) => {
   steps.set("addCorePowerSE", async ({ actor }) => {
     const ae = getDocumentClass("ActiveEffect");
-    await ae.create({
-      name: game.i18n.localize("lancer-speed-provider.statuses.core_power"),
-      statuses: ["core_power_active"],
-      icon: "systems/lancer/assets/icons/macro-icons/corebonus.svg",
-      "flags.lancer-speed-provider.status": true,
-    }, { parent: actor });
+    await ae.create(
+      {
+        name: game.i18n.localize("lancer-speed-provider.statuses.core_power"),
+        statuses: ["core_power_active"],
+        icon: "systems/lancer/assets/icons/white/corepower.svg",
+        "flags.lancer-speed-provider.status": true,
+      },
+      { parent: actor },
+    );
     return true;
   });
   flows
@@ -181,10 +184,25 @@ Hooks.on("updateCombat", (combat, change) => {
   combatant.setFlag("lancer-speed-provider", "turn-status", conditionIds);
 });
 
+Hooks.on("preDeleteCombatant", (combatant) => {
+  combatant.actor?.effects
+    .filter((e) => e.getFlag("lancer-speed-provider", "status"))
+    .forEach((e) => e.delete());
+});
+
+Hooks.on("preDeleteCombat", (combat) => {
+  combat.combatants.forEach((c) =>
+    c.actor?.effects
+      .filter((e) => e.getFlag("lancer-speed-provider", "status"))
+      .forEach((e) => e.delete()),
+  );
+});
+
 function tokenSpeed(token) {
   const actor = token.actor;
   let speed = actor.system.speed;
   speed += enkidu_all_fours(actor);
+  speed += lycan_go_loud(actor);
   if (token.actor.statuses.has("prone")) speed = Math.floor(speed / 2);
   return speed;
 }
@@ -230,6 +248,13 @@ function slowed(actor) {
 function enkidu_all_fours(actor) {
   return actor.items.some((i) => i.system.lid === "mf_tokugawa_alt_enkidu") &&
     actor.statuses.has("dangerzone")
+    ? 3
+    : 0;
+}
+
+function lycan_go_loud(actor) {
+  return actor.items.some((i) => i.system.lid === "mf_lycan") &&
+    actor.statuses.has("core_power_active")
     ? 3
     : 0;
 }
