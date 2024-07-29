@@ -157,6 +157,7 @@ Hooks.once("init", () => {
 
 Hooks.once("lancer.registerFlows", (steps, flows) => {
   steps.set("addCorePowerSE", async ({ actor }) => {
+    if (actor.statuses.has("core_power_active")) return true;
     const ae = getDocumentClass("ActiveEffect");
     await ae.create(
       {
