@@ -7,6 +7,9 @@
       "color-standard": { "label": "Standard Move Color" },
       "color-boost": { "label": "Boost Color" },
       "color-over-boost": { "label": "Overcharge+Boost Color" }
+    },
+    "statuses": {
+      "core_power": "Core Power Active"
     }
   }
 }
