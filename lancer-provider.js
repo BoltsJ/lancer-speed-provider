@@ -67,15 +67,28 @@ Hooks.once("dragRuler.ready", (SpeedProvider) => {
 
 Hooks.once("init", () => {
   if (!game.modules.get("elevationruler")?.active) return;
+  if (game.modules.get("drag-ruler")?.active) {
+    Hooks.once("ready", () => {
+      Dialog.prompt({
+        title: "WARNING",
+        content:
+          "WARNING: Drag Ruler and Elevation Ruler both detected as active. These modules conflict. Please disable one.",
+      })
+        .catch(() => {})
+        .then(() => new ModuleManagement().render(true));
+    });
+  }
+
+  const isV12 = game.release.generation >= 12;
+  if (!isV12) Hooks.on("renderSettingsConfig", renderSettingsConfig);
 
   game.settings.register("lancer-speed-provider", "color-standard", {
     name: "lancer-speed-provider.settings.color-standard.label",
     scope: "client",
-    type: new foundry.data.fields.ColorField({
-      required: true,
-      blank: false,
-      initial: "#1e88e5",
-    }),
+    type: isV12
+      ? new foundry.data.fields.ColorField({ required: true, blank: false })
+      : String,
+    default: "#1e88e5",
     config: true,
     onChange: (val) =>
       (CONFIG.elevationruler.SPEED.CATEGORIES.find(
@@ -85,11 +98,10 @@ Hooks.once("init", () => {
   game.settings.register("lancer-speed-provider", "color-boost", {
     name: "lancer-speed-provider.settings.color-boost.label",
     scope: "client",
-    type: new foundry.data.fields.ColorField({
-      required: true,
-      blank: false,
-      initial: "#ffc107",
-    }),
+    type: isV12
+      ? new foundry.data.fields.ColorField({ required: true, blank: false })
+      : String,
+    default: "#ffc107",
     config: true,
     onChange: (val) =>
       (CONFIG.elevationruler.SPEED.CATEGORIES.find(
@@ -99,11 +111,10 @@ Hooks.once("init", () => {
   game.settings.register("lancer-speed-provider", "color-over-boost", {
     name: "lancer-speed-provider.settings.color-over-boost.label",
     scope: "client",
-    type: new foundry.data.fields.ColorField({
-      required: true,
-      blank: false,
-      initial: "#d81b60",
-    }),
+    type: isV12
+      ? new foundry.data.fields.ColorField({ required: true, blank: false })
+      : String,
+    default: "#d81b60",
     config: true,
     onChange: (val) =>
       (CONFIG.elevationruler.SPEED.CATEGORIES.find(
@@ -155,15 +166,15 @@ Hooks.on("updateCombat", (combat, change) => {
 });
 
 function tokenSpeed(token) {
-  if (isStunned(token)) return 0;
   const actor = token.actor;
-  let speed = actor.system.speed + enkidu_all_fours(actor);
-  if (token.actor.statuses.has("prone")) speed /= 2;
+  let speed = actor.system.speed;
+  speed += enkidu_all_fours(actor);
+  if (token.actor.statuses.has("prone")) speed = Math.floor(speed / 2);
   return speed;
 }
 
 function maximumCategoryDistance(token, speedCategory, tokenSpeed) {
-  // if (speedCategory.name === "Unreachable") return Infinity;
+  if (speedCategory.name === "Unreachable") return Infinity;
   if (
     isStunned(token) ||
     (speedCategory.name === "lancer-speed-provider.over-boost" &&
@@ -176,7 +187,7 @@ function maximumCategoryDistance(token, speedCategory, tokenSpeed) {
   )
     return 0;
 
-  tokenSpeed ??= tokenSpeed(token);
+  tokenSpeed ??= CONFIG.elevationruler.SPEED.tokenSpeed(token);
   const startedProne = token.combatant
     ?.getFlag("lancer-speed-provider", "turn-status")
     ?.includes("prone");
@@ -211,4 +222,26 @@ function isStunned(token) {
   return !token.actor.statuses.isDisjointFrom(
     new Set(["stunned", "immobilized", "shutdown", "downandout"]),
   );
+}
+
+function renderSettingsConfig(_app, el) {
+  let standard = game.settings.get("lancer-speed-provider", "color-standard");
+  let boost = game.settings.get("lancer-speed-provider", "color-boost");
+  let ovboost = game.settings.get("lancer-speed-provider", "color-over-boost");
+
+  el.find('[name="lancer-speed-provider.color-standard"]')
+    .parent()
+    .append(
+      `<input type="color" value="${standard}" data-edit="lancer-speed-provider.color-standard">`,
+    );
+  el.find('[name="lancer-speed-provider.color-boost"]')
+    .parent()
+    .append(
+      `<input type="color" value="${boost}" data-edit="lancer-speed-provider.color-boost">`,
+    );
+  el.find('[name="lancer-speed-provider.color-over-boost"]')
+    .parent()
+    .append(
+      `<input type="color" value="${ovboost}" data-edit="lancer-speed-provider.color-over-boost">`,
+    );
 }

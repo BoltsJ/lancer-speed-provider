@@ -6,7 +6,7 @@
   "type": "module",
   "version": "0.0a",
   "compatibility": {
-    "minimum": "12",
+    "minimum": "11",
     "verified": "12"
   },
   "relationships": {
@@ -24,12 +24,7 @@
       {
         "id": "drag-ruler",
         "type": "module",
-        "reason": "Either Drag Ruler or Elevation Ruler is required. Elevation Ruler is recommended. They conflict, so only enable one"
-      },
-      {
-        "id": "elevationruler",
-        "type": "module",
-        "reason": "Either Drag Ruler or Elevation Ruler is required. Elevation Ruler is recommended. They conflict, so only enable one"
+        "reason": "Either Drag Ruler or Elevation Ruler is required. Drag Ruler is recommended. They conflict, so only enable one"
       }
     ]
   },
