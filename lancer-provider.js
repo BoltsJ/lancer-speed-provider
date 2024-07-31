@@ -209,7 +209,8 @@ function tokenSpeed(token) {
 }
 
 function maximumCategoryDistance(token, speedCategory, tokenSpeed) {
-  if (speedCategory.name === "Unreachable") return Infinity;
+  tokenSpeed ??= CONFIG.elevationruler.SPEED.tokenSpeed(token);
+  if (speedCategory.name === "Unreachable") return tokenSpeed * Infinity;
   if (
     isStunned(token) ||
     (speedCategory.name === "lancer-speed-provider.over-boost" &&
@@ -218,11 +219,10 @@ function maximumCategoryDistance(token, speedCategory, tokenSpeed) {
       "lancer-speed-provider.boost",
       "lancer-speed-provider.over-boost",
     ].includes(speedCategory.name) &&
-      slowed(token.actor))
+      (token.actor.statuses.has("slow") || token.actor.statuses.has("prone")))
   )
     return 0;
 
-  tokenSpeed ??= CONFIG.elevationruler.SPEED.tokenSpeed(token);
   const startedProne = token.combatant
     ?.getFlag("lancer-speed-provider", "turn-status")
     ?.includes("prone");
@@ -242,8 +242,9 @@ function canOvercharge(actor) {
   return actor.is_mech();
 }
 
-function slowed(actor) {
-  return !actor.statuses.isDisjointFrom(new Set(["slow", "prone"]));
+const stunnedSet = ["stunned", "immobilized", "shutdown", "downandout"];
+function isStunned(token) {
+  return stunnedSet.some((e) => token.actor.statuses.has(e));
 }
 
 function enkidu_all_fours(actor) {
@@ -258,12 +259,6 @@ function lycan_go_loud(actor) {
     actor.statuses.has("core_power_active")
     ? 3
     : 0;
-}
-
-function isStunned(token) {
-  return !token.actor.statuses.isDisjointFrom(
-    new Set(["stunned", "immobilized", "shutdown", "downandout"]),
-  );
 }
 
 function renderSettingsConfig(_app, el) {
