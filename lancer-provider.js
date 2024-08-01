@@ -78,7 +78,29 @@ Hooks.once("init", () => {
   }
 
   const isV12 = game.release.generation >= 12;
-  if (!isV12) Hooks.on("renderSettingsConfig", renderSettingsConfig);
+  if (!isV12) {
+    Hooks.on("renderSettingsConfig", renderSettingsConfig);
+    Hooks.on("canvasInit", (gameCanvas) => {
+      const r = (rule) => {
+        switch (rule) {
+          case "121":
+            return "5105";
+          case "222":
+            return "MANHATTAN";
+          case "euc":
+            return "EUCL";
+          case "111":
+          default:
+            return "555";
+        }
+      };
+      if (gameCanvas.grid.isHex) canvas.grid.diagonalRule = r("111");
+      else
+        canvas.grid.diagonalRule = r(
+          game.settings.get("lancer", "squareGridDiagonals"),
+        );
+    });
+  }
 
   game.settings.register("lancer-speed-provider", "color-standard", {
     name: "lancer-speed-provider.settings.color-standard.label",
