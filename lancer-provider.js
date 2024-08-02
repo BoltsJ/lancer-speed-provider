@@ -30,6 +30,7 @@ Hooks.once("dragRuler.ready", (SpeedProvider) => {
       const effects = Array.from(actor.statuses);
       /**@type{number}*/
       let speed = tokenSpeed(token);
+      const boost_bonus = nerveweave_boost_bonus(actor);
       const stunned = isStunned(token);
       // Cant move if stunned or immobilized
       if (stunned) return [{ range: -1, color: "standard" }];
@@ -45,15 +46,14 @@ Hooks.once("dragRuler.ready", (SpeedProvider) => {
       const ranges = [];
       if (prone || !startedProne) {
         ranges.push({ range, color: "standard" });
-        range += speed;
+        range += speed + boost_bonus;
       }
       if (!slowed) {
         ranges.push({ range, color: "boost" });
-        range += speed;
+        range += speed + boost_bonus;
       }
       if (!slowed && canOvercharge(actor)) {
         ranges.push({ range, color: "over-boost" });
-        range += speed;
       }
 
       return ranges;
@@ -230,26 +230,32 @@ function tokenSpeed(token) {
 
 function maximumCategoryDistance(token, speedCategory, tokenSpeed) {
   tokenSpeed ??= CONFIG.elevationruler.SPEED.tokenSpeed(token);
+  const CATEGORIES = CONFIG.elevationruler.SPEED.CATEGORIES;
   if (speedCategory.name === "Unreachable") return tokenSpeed * Infinity;
-  if (
-    isStunned(token) ||
-    (speedCategory.name === "lancer-speed-provider.over-boost" &&
-      !canOvercharge(token.actor)) ||
-    ([
-      "lancer-speed-provider.boost",
-      "lancer-speed-provider.over-boost",
-    ].includes(speedCategory.name) &&
-      (token.actor.statuses.has("slow") || token.actor.statuses.has("prone")))
-  )
-    return 0;
+
+  const idx = CATEGORIES.indexOf(speedCategory);
 
   const startedProne = token.combatant
     ?.getFlag("lancer-speed-provider", "turn-status")
     ?.includes("prone");
   const prone = token.actor.statuses.has("prone");
   const firstMove = prone || !startedProne;
-  const multiplier = speedCategory.multiplier - (firstMove ? 0 : 1);
-  return tokenSpeed * multiplier;
+
+  if (
+    isStunned(token) ||
+    (idx === 2 && !canOvercharge(token.actor)) ||
+    (idx > 0 && (prone || token.actor.statuses.has("slow"))) ||
+    (idx === 0 && !firstMove)
+  )
+    return 0;
+  const accum =
+    idx > 0
+      ? maximumCategoryDistance(token, CATEGORIES[idx - 1], tokenSpeed)
+      : 0;
+
+  return (
+    accum + tokenSpeed + (idx > 0 ? nerveweave_boost_bonus(token.actor) : 0)
+  );
 }
 
 /**
@@ -279,6 +285,17 @@ function lycan_go_loud(actor) {
     actor.statuses.has("core_power_active")
     ? 3
     : 0;
+}
+
+function nerveweave_boost_bonus(actor) {
+  if (!actor.is_mech()) return 0;
+  const pilot = actor.system.pilot?.value;
+  if (
+    pilot &&
+    pilot.items.some((i) => i.system.lid === "cb_integrated_nerveweave")
+  )
+    return 2;
+  return 0;
 }
 
 function renderSettingsConfig(_app, el) {
